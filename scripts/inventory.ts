@@ -1,4 +1,4 @@
-// Inventory of every PDF under ~/Downloads/Kate: md5 dedupe, page counts, text-layer check, role.
+// Inventory of every PDF under MATERIALS_DIR: md5 dedupe, page counts, text-layer check, role.
 // Writes content/inventory.json (gitignored). Run: pnpm inventory
 import { mkdir, readdir, stat, writeFile } from 'node:fs/promises'
 import { basename, join, relative } from 'node:path'
