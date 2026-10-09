@@ -62,7 +62,7 @@ export function Home() {
         </Card>
 
         <Link to="/study/today" data-testid="home-today" className="block">
-          <Card className="flex items-center gap-4 bg-sage-strong text-white">
+          <Card className="flex items-center gap-4 bg-sage-strong text-on-accent">
             <Sun size={28} />
             <div className="flex-1">
               <div className="text-lg font-bold">Сегодня — план на день</div>

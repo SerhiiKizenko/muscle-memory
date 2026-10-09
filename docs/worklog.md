@@ -34,3 +34,16 @@
    `content/verified/<batch>.ts` each; encrypt + push after each batch).
 2. G2 on an iPhone: passphrase, add to Home Screen, offline check, Backup round trip.
 3. Session 2: remaining Block-1 clusters with OCR sources, Block-3 ММТ enrichment from the atlas, Block-2 images.
+
+## 2026-10-09 — Chrome MCP verification run (live site)
+
+Driven through Serhii's Chrome at phone width (430 px) and desktop width (1400 px) on the real bundle
+(auto-unlocked by his cached key) and on the dummy bundle (`?data=data-test`):
+- Home, «Сегодня» (28 new), reveal, «Знаю» → box 2 due tomorrow, «Не знаю» → box 1 + requeue, streak 1,
+  counters update, progress survives reload; service worker active, `bundle.enc` precached (offline OK).
+- «Блок / тема» list + cluster session, «Билет» (6), «Слабые места» (2 clusters), Settings theme switch.
+- Lock screen: wrong passphrase → «Неверный пароль.», right → onboarding → home. No console errors.
+- Found and fixed: cached key/progress were not scoped by data dir (a test bundle would have wiped the real
+  key); dark-mode filled buttons used white text on pale fills (new `--c-on-accent` token); muscle groups
+  now listed in anatomical order. Not exercised: Backup download / Restore file picker (need a real file
+  dialog), iOS Share sheet, airplane mode — G2 on the iPhone still covers those.

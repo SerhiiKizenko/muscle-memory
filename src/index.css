@@ -17,6 +17,7 @@
   --c-ok: #7fb58e;
   --c-warn: #e7b86a;
   --c-bad: #e39c8e;
+  --c-on-accent: #ffffff;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -34,6 +35,7 @@
     --c-ok: #8fc49c;
     --c-warn: #d9ae6b;
     --c-bad: #d98c7d;
+    --c-on-accent: #1c1b1f;
   }
 }
 :root[data-theme="dark"] {
@@ -51,6 +53,7 @@
   --c-ok: #8fc49c;
   --c-warn: #d9ae6b;
   --c-bad: #d98c7d;
+  --c-on-accent: #1c1b1f;
 }
 
 /* Expose tokens to Tailwind utilities: bg-bg, text-ink, bg-sage, border-rose … */
@@ -70,6 +73,7 @@
   --color-ok: var(--c-ok);
   --color-warn: var(--c-warn);
   --color-bad: var(--c-bad);
+  --color-on-accent: var(--c-on-accent);
 }
 
 html, body, #root { min-height: 100dvh; }

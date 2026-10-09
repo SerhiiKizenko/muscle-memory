@@ -19,7 +19,7 @@ export function Lock() {
   return (
     <main className="safe-top safe-bottom safe-x mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center gap-6">
       <div className="flex flex-col items-center gap-3 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-sage text-white">
+        <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-sage text-on-accent">
           <LockIcon size={28} />
         </div>
         <h1 className="text-3xl font-bold">Мышечная память</h1>

@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { BLOCK_TITLES, type Block } from '../content/schema'
+import { BLOCK_TITLES, clusterRank, type Block } from '../content/schema'
 import { clusterStats, type SchedCard } from '../engine/scheduler'
 import { useContent } from '../store/content'
 import { useProgress } from '../store/progress'
@@ -24,7 +24,9 @@ export function Topics() {
     const sched: SchedCard[] = cards.map((c) => ({ id: c.id, block: c.block, cluster: c.cluster, examNumber: c.examNumber }))
     const titles = new Map<string, string>()
     for (const c of cards) titles.set(`${c.block}:${c.cluster}`, c.clusterTitle)
-    return clusterStats(sched, progress).map((s) => ({ ...s, title: titles.get(`${s.block}:${s.cluster}`) ?? s.cluster }))
+    return clusterStats(sched, progress)
+      .map((s) => ({ ...s, title: titles.get(`${s.block}:${s.cluster}`) ?? s.cluster }))
+      .sort((a, b) => a.block - b.block || clusterRank(a.cluster) - clusterRank(b.cluster) || a.cluster.localeCompare(b.cluster))
   }, [cards, progress])
 
   return (

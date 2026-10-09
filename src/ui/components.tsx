@@ -25,12 +25,12 @@ export function Screen({ title, back, right, children, footer }: { title?: strin
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'ok' | 'warn' | 'bad'
 const variants: Record<Variant, string> = {
-  primary: 'bg-sage-strong text-white active:opacity-80',
+  primary: 'bg-sage-strong text-on-accent active:opacity-80',
   secondary: 'bg-surface-2 text-ink active:opacity-80',
   ghost: 'bg-transparent text-ink-muted active:bg-surface-2',
-  ok: 'bg-ok text-white active:opacity-80',
+  ok: 'bg-ok text-on-accent active:opacity-80',
   warn: 'bg-warn text-ink active:opacity-80',
-  bad: 'bg-bad text-white active:opacity-80',
+  bad: 'bg-bad text-on-accent active:opacity-80',
 }
 
 export function Button({ variant = 'primary', className = '', ...rest }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant }) {

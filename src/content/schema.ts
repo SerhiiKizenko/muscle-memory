@@ -113,6 +113,13 @@ export function block1Cluster(n: number): { key: string; title: string } {
   return { key: c.key, title: c.title }
 }
 
+/** Display order of muscle-group and skill clusters (Block-1 letters sort naturally). */
+export const CLUSTER_ORDER = ['head', 'neck', 'shoulder', 'trunk', 'pelvis', 'leg', 'other', 'vd', 'chains', 'gait', 'corr']
+export const clusterRank = (key: string): number => {
+  const i = CLUSTER_ORDER.indexOf(key)
+  return i < 0 ? -1 : i
+}
+
 export const BLOCK_TITLES: Record<Block, string> = {
   1: 'Теория',
   2: 'Анатомия мышц',
