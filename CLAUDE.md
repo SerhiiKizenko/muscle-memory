@@ -11,7 +11,7 @@ passphrase (`.env.local`), the learner's full name, or the kickoff prompt. Only 
 
 ```sh
 pnpm dev / build / test / e2e        # app; e2e = Playwright WebKit iPhone 13 against `pnpm preview`
-pnpm inventory                       # content/inventory.json from ~/Downloads/Kate (md5 dedupe, text layer, OCR queue)
+pnpm inventory                       # content/inventory.json from MATERIALS_DIR (set in .env.local) (md5 dedupe, text layer, OCR queue)
 pnpm extract                         # text PDFs → sources/text/<slug>/pNNN.txt + all.txt
 pnpm ocr [--only "04 ВД"] | pnpm ocr --file <pdf> --pages 1-8,12   # scanned decks / atlas pages → sources/ocr/<slug>/
 pnpm find "регекс" [--in slug] [--ctx 1]   # search extracted + OCR text, prints slug p.N: line

@@ -2,7 +2,7 @@
 // (plus all.txt with "=== page N ===" markers for grep). Idempotent; --force re-extracts. Run: pnpm extract
 import { mkdir, readFile, stat, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { INVENTORY_JSON, KATE_DIR, TEXT_DIR } from './lib/paths'
+import { INVENTORY_JSON, MATERIALS_DIR, TEXT_DIR } from './lib/paths'
 import { pMap, run } from './lib/run'
 import type { InventoryEntry } from './inventory'
 
@@ -13,7 +13,7 @@ async function extractOne(e: InventoryEntry): Promise<string> {
   const allFile = join(dir, 'all.txt')
   if (!force && (await stat(allFile).catch(() => null))) return `skip   ${e.slug} (exists)`
   await mkdir(dir, { recursive: true })
-  const text = await run('pdftotext', ['-layout', join(KATE_DIR, e.rel), '-'])
+  const text = await run('pdftotext', ['-layout', join(MATERIALS_DIR, e.rel), '-'])
   const pages = text.split('\f')
   if (pages.at(-1)?.trim() === '') pages.pop()
   const parts: string[] = []

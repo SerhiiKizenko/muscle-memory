@@ -2,7 +2,7 @@
 // Writes content/inventory.json (gitignored). Run: pnpm inventory
 import { mkdir, readdir, stat, writeFile } from 'node:fs/promises'
 import { basename, join, relative } from 'node:path'
-import { CONTENT_DIR, INVENTORY_JSON, KATE_DIR, slugOf } from './lib/paths'
+import { CONTENT_DIR, INVENTORY_JSON, MATERIALS_DIR, slugOf } from './lib/paths'
 import { md5File, pdfPages, pMap, run } from './lib/run'
 
 export type Role = 'source' | 'duplicate' | 'out-of-scope'
@@ -63,9 +63,9 @@ function ocrPriorityOf(b: string): number {
 }
 
 async function main() {
-  const files = await walk(KATE_DIR)
+  const files = await walk(MATERIALS_DIR)
   const entries = await pMap(files, 4, async (file): Promise<InventoryEntry> => {
-    const rel = relative(KATE_DIR, file)
+    const rel = relative(MATERIALS_DIR, file)
     const [bytes, md5, pages, text] = await Promise.all([
       stat(file).then((s) => s.size),
       md5File(file),
@@ -90,7 +90,7 @@ async function main() {
   }
 
   await mkdir(CONTENT_DIR, { recursive: true })
-  await writeFile(INVENTORY_JSON, JSON.stringify({ generatedAt: new Date().toISOString(), root: KATE_DIR, entries }, null, 2) + '\n')
+  await writeFile(INVENTORY_JSON, JSON.stringify({ generatedAt: new Date().toISOString(), root: MATERIALS_DIR, entries }, null, 2) + '\n')
 
   const sources = entries.filter((e) => e.role === 'source')
   const scanned = sources.filter((e) => e.ocrPriority)

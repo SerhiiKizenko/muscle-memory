@@ -7,7 +7,7 @@
 //   options: --jobs 4  --psm 6  --dpi 300
 import { mkdir, readFile, rm, stat, writeFile, readdir } from 'node:fs/promises'
 import { basename, join } from 'node:path'
-import { INVENTORY_JSON, KATE_DIR, OCR_DIR, slugOf } from './lib/paths'
+import { INVENTORY_JSON, MATERIALS_DIR, OCR_DIR, slugOf } from './lib/paths'
 import { pMap, pdfPages, run } from './lib/run'
 import type { InventoryEntry } from './inventory'
 
@@ -92,7 +92,7 @@ async function main() {
     .filter((e) => !only || basename(e.rel).includes(only))
     .sort((a, b) => a.ocrPriority! - b.ocrPriority! || a.rel.localeCompare(b.rel, 'ru'))
   await log(`queue: ${queue.length} decks, ${queue.reduce((n, e) => n + e.pages, 0)} pages, ${JOBS} jobs`)
-  for (const e of queue) await ocrFile(join(KATE_DIR, e.rel))
+  for (const e of queue) await ocrFile(join(MATERIALS_DIR, e.rel))
   await log('queue finished')
 }
 
