@@ -1,5 +1,7 @@
 // Per-device cache of the raw AES key (hex), never the passphrase. Opt-in via «Запомнить на этом устройстве».
-const KEY = 'mm.rawKey'
+import { storageScope } from '../content/load'
+
+const KEY = `mm.rawKey${storageScope()}`
 
 export function loadCachedKeyHex(): string | null {
   try {

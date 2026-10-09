@@ -11,20 +11,29 @@ export interface Manifest {
   counts: Record<string, { total: number; checked: number }>
 }
 
-export function dataBase(): string {
-  let dir = 'data'
+/** The data directory name: "data" (real bundle) or a test directory chosen with ?data=… for this tab. */
+export function dataDir(): string {
+  if (typeof window === 'undefined') return 'data'
   try {
     const q = new URLSearchParams(window.location.search).get('data')
     if (q && /^[\w-]+$/.test(q)) {
-      dir = q
       sessionStorage.setItem('mm.dataDir', q)
-    } else {
-      dir = sessionStorage.getItem('mm.dataDir') ?? 'data'
+      return q
     }
+    return sessionStorage.getItem('mm.dataDir') ?? 'data'
   } catch {
-    /* no storage → default */
+    return 'data'
   }
-  return `${import.meta.env.BASE_URL}${dir}/`
+}
+
+/** Storage key suffix so a test bundle never touches the real bundle's cached key or progress. */
+export function storageScope(): string {
+  const d = dataDir()
+  return d === 'data' ? '' : `:${d}`
+}
+
+export function dataBase(): string {
+  return `${import.meta.env.BASE_URL}${dataDir()}/`
 }
 
 async function fetchOk(url: string, init?: RequestInit): Promise<Response> {

@@ -3,6 +3,7 @@
 import { z } from 'zod'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { storageScope } from '../content/load'
 import { addDays, applyGrade, type Grade, type ProgressMap } from '../engine/scheduler'
 
 const Box = z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5)])
@@ -81,7 +82,7 @@ export const useProgress = create<ProgressState>()(
         set({ progress: {}, stats: defaultStats })
       },
     }),
-    { name: 'mm.progress', version: 1 },
+    { name: `mm.progress${storageScope()}`, version: 1 },
   ),
 )
 
