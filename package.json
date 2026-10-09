@@ -18,7 +18,9 @@
     "ocr": "tsx scripts/ocr.ts",
     "validate": "tsx scripts/validate.ts",
     "encrypt": "tsx scripts/encrypt.ts",
-    "import-answers": "tsx scripts/import-answers.ts"
+    "import-answers": "tsx scripts/import-answers.ts",
+    "find": "tsx scripts/find.ts",
+    "apply-verified": "tsx scripts/apply-verified.ts"
   },
   "dependencies": {
     "@fontsource-variable/nunito": "^5.3.0",

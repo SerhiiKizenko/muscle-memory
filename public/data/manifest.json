@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "builtAt": "2026-10-09T12:38:14.159Z",
+  "bundle": {
+    "file": "bundle.enc",
+    "bytes": 460840
+  },
+  "images": [],
+  "counts": {
+    "1": {
+      "total": 169,
+      "checked": 8
+    },
+    "2": {
+      "total": 36,
+      "checked": 2
+    },
+    "3": {
+      "total": 41,
+      "checked": 0
+    },
+    "4": {
+      "total": 32,
+      "checked": 0
+    }
+  }
+}

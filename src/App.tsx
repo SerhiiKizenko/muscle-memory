@@ -1,20 +1,53 @@
-import { HashRouter, Routes, Route } from 'react-router-dom'
+import { useEffect } from 'react'
+import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { useContent } from './store/content'
+import { useProgress } from './store/progress'
+import { Home } from './ui/Home'
+import { Lock } from './ui/Lock'
+import { Onboarding } from './ui/Onboarding'
+import { Settings } from './ui/Settings'
+import { Study } from './ui/Study'
+import { Topics } from './ui/Topics'
+import { Weak } from './ui/Weak'
 
-function Shell() {
+function Gate() {
+  const status = useContent((s) => s.status)
+  const init = useContent((s) => s.init)
+  const onboarded = useProgress((s) => s.settings.onboarded)
+  useEffect(() => {
+    if (status === 'idle') void init()
+  }, [status, init])
+
+  if (status === 'idle' || status === 'checking')
+    return (
+      <main className="flex min-h-dvh items-center justify-center text-ink-muted" data-testid="splash">
+        Открываю материалы…
+      </main>
+    )
+  if (status !== 'ready') return <Lock />
+  if (!onboarded) return <Onboarding />
   return (
-    <main className="safe-top safe-bottom safe-x flex min-h-dvh flex-col items-center justify-center gap-4 text-center">
-      <h1 className="text-3xl font-bold">Мышечная память</h1>
-      <p className="text-ink-muted">Тренажёр к экзамену. Скоро здесь появятся карточки.</p>
-    </main>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/study/:mode" element={<Study />} />
+      <Route path="/topics" element={<Topics />} />
+      <Route path="/weak" element={<Weak />} />
+      <Route path="/settings" element={<Settings />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   )
 }
 
 export function App() {
+  const theme = useProgress((s) => s.settings.theme)
+  useEffect(() => {
+    const root = document.documentElement
+    if (theme === 'auto') delete root.dataset.theme
+    else root.dataset.theme = theme
+  }, [theme])
   return (
     <HashRouter>
-      <Routes>
-        <Route path="*" element={<Shell />} />
-      </Routes>
+      <Gate />
     </HashRouter>
   )
 }
