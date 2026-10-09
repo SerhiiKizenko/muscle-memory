@@ -151,9 +151,18 @@ export function buildWeakQueue(cards: SchedCard[], progress: ProgressMap): strin
   return interleaveByCluster(cards.filter((c) => (progress[c.id]?.box ?? 9) <= 2)).map((c) => c.id)
 }
 
-/** «Повтор перед экзаменом»: everything seen that is not yet in boxes 4–5; no new cards. */
+/** «Повтор перед экзаменом»: every card seen so far, weakest box first, no new cards. */
 export function buildFinalReviewQueue(cards: SchedCard[], progress: ProgressMap): string[] {
-  return interleaveByCluster(cards.filter((c) => (progress[c.id]?.box ?? 9) <= 3)).map((c) => c.id)
+  const seen = cards.filter((c) => progress[c.id] !== undefined)
+  const out: string[] = []
+  for (const box of [1, 2, 3, 4, 5] as Box[]) out.push(...interleaveByCluster(seen.filter((c) => progress[c.id]!.box === box)).map((c) => c.id))
+  return out
+}
+
+/** «Ещё N новых»: the next unseen cards beyond today's quota, cluster-interleaved. */
+export function buildExtraNewQueue(cards: SchedCard[], progress: ProgressMap, n: number): string[] {
+  const fresh = cards.filter((c) => progress[c.id] === undefined).sort(byExamOrder)
+  return interleaveByCluster(fresh).slice(0, n).map((c) => c.id)
 }
 
 /** «Билет»: 3 × block 1 from different clusters + 1 each of blocks 2, 3, 4. */

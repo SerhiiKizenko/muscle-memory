@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import type { Block } from '../content/schema'
 import {
+  buildExtraNewQueue,
   buildFinalReviewQueue,
   buildTicket,
   buildTodayQueue,
@@ -62,6 +63,24 @@ export function Study() {
   const id = currentCard(session)
   const card = id ? byId[id] : undefined
   const title = useMemo(() => MODE_TITLES[mode] ?? 'Карточки', [mode])
+  const unseenCount = useMemo(() => {
+    const { progress } = useProgress.getState()
+    return cards.filter((c) => progress[c.id] === undefined).length
+  }, [cards, session])
+
+  function moreNew() {
+    const { progress } = useProgress.getState()
+    const sched: SchedCard[] = cards.map((c) => ({ id: c.id, block: c.block, cluster: c.cluster, examNumber: c.examNumber }))
+    setSession(startSession(buildExtraNewQueue(sched, progress, 10)))
+    setRevealed(false)
+    window.scrollTo({ top: 0 })
+  }
+  const moreNewButton =
+    mode === 'today' && unseenCount > 0 ? (
+      <Button data-testid="study-more-new" variant="secondary" onClick={moreNew}>
+        Ещё {Math.min(10, unseenCount)} новых
+      </Button>
+    ) : null
 
   function onGrade(g: Grade) {
     if (!id) return
@@ -76,7 +95,8 @@ export function Study() {
       <Screen title={title} back="/">
         <Card className="mt-4 flex flex-col items-center gap-4 text-center">
           <p className="text-lg font-semibold">Карточек нет</p>
-          <p className="text-ink-muted">{mode === 'today' ? 'На сегодня всё сделано. Можно повторить тему или собрать билет.' : 'В этом режиме пока нечего показывать.'}</p>
+          <p className="text-ink-muted">{mode === 'today' ? 'На сегодня всё сделано. Можно взять ещё новых, повторить тему или собрать билет.' : 'В этом режиме пока нечего показывать.'}</p>
+          {moreNewButton}
           <Link to="/"><Button variant="secondary">На главную</Button></Link>
         </Card>
       </Screen>
@@ -88,6 +108,7 @@ export function Study() {
         <Card data-testid="study-finished" className="mt-4 flex flex-col items-center gap-4 text-center">
           <p className="text-2xl font-bold">Готово</p>
           <p className="text-ink-muted">Пройдено карточек: {session.done}</p>
+          {moreNewButton}
           <Link to="/"><Button>На главную</Button></Link>
         </Card>
       </Screen>

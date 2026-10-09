@@ -28,6 +28,10 @@ test.describe('smoke (iPhone)', () => {
     await expect(t.get.answer()).toContainText('Тестовый ответ')
     await t.when.gradeGood()
     await expect(t.get.finished()).toBeVisible()
+    // «Ещё N новых» continues with unseen cards beyond the quota.
+    await page.getByTestId('study-more-new').click()
+    await expect(t.get.prompt()).toContainText('Тестовый')
+    await expect(t.get.remaining()).toContainText('осталось 6')
 
     // «Блок / тема»: a failed card is requeued, so the session continues with another prompt.
     await t.when.openTopic(1)
