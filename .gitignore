@@ -6,8 +6,8 @@ dist/
 .env.local
 .env.*.local
 # plaintext course content and source PDFs — the repo is public
-content/
-sources/
+/content/
+/sources/
 # tooling noise
 *.log
 .DS_Store
