@@ -2,13 +2,11 @@
 
 Cards that need a human (Kate / Serhii) before they can be trusted. Ids only — the repo is public, so no course text here. Details live in the local, gitignored `content/import-report.md`.
 
-## Stubs — no answer in the draft (6)
+## Stubs — no answer in the draft (4)
 
 - `b3-m06` — нет описания теста в черновике
 - `b3-m07` — нет описания теста в черновике
 - `b3-m08` — нет описания теста в черновике
-- `b3-m39` — нет описания теста в черновике
-- `b3-m40` — нет описания теста в черновике
 - `b3-m41` — нет описания теста в черновике
 
 ## Unsupported claims

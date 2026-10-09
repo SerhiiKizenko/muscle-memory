@@ -218,7 +218,7 @@ function parseMmtDraft(lines: string[]): MmtDraft[] {
 const STOP = new Set(['мышца', 'мышцы', 'мышц', 'и', 'm', 'mm', 'группа'])
 function nameTokens(s: string): Set<string> {
   return new Set(
-    s.toLowerCase().replace(/ё/g, 'е').replace(/\(.*?\)/g, ' ').replace(/\bшоп\b/g, 'шейного отдела позвоночника')
+    s.toLowerCase().replace(/ё/g, 'е').replace(/\(.*?\)/g, ' ').replace(/(^|\s)шоп(?=\s|$)/g, '$1шейного отдела позвоночника')
       .replace(/[^а-я\s-]/g, ' ').split(/[\s-]+/).filter((w) => w && !STOP.has(w)),
   )
 }
