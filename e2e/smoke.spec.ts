@@ -18,6 +18,8 @@ test.describe('smoke (iPhone)', () => {
     await expect(t.get.onboardingStart()).toBeVisible()
     await t.when.finishOnboarding()
     await expect(t.get.homeDays()).toContainText('Экзамен через')
+    // The call-to-action card must keep its accent background (a bg-* collision once made it white on white).
+    await expect(t.get.homeToday().locator('> div')).toHaveCSS('background-color', 'rgb(110, 154, 128)')
 
     // «Сегодня»: 7 dummy cards, 14 days → quota of 1 new card, so one grade finishes the session.
     await t.when.startToday()

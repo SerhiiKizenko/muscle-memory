@@ -73,9 +73,12 @@ export function Home() {
             <span className="flex items-center gap-1 text-base font-semibold">Начать <ChevronRight size={20} /></span>
           </Card>
         </Link>
-        {seen === 0 ? (
-          <p className="px-1 text-sm text-ink-muted">Как это работает: читаете вопрос → отвечаете вслух → «Показать ответ» → честно оцениваете себя. Карточки, которые не знаете, вернутся позже в этой же сессии и в следующие дни.</p>
-        ) : null}
+        <p className="px-1 text-sm text-ink-muted">
+          {seen === 0 ? 'Читаете вопрос → отвечаете вслух → «Показать ответ» → оцениваете себя. ' : ''}
+          <Link to="/help" data-testid="home-help" className="font-semibold text-sage-strong">
+            Как заниматься →
+          </Link>
+        </p>
 
         <p className="px-1 pt-1 text-xs font-semibold uppercase tracking-wide text-ink-muted">Дополнительно</p>
         <div className="grid grid-cols-2 gap-3">

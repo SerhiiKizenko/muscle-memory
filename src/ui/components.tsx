@@ -73,8 +73,10 @@ export function ProgressRing({ value, size = 96, label, sub }: { value: number; 
 }
 
 export function Card({ children, className = '', ...rest }: HTMLAttributes<HTMLDivElement> & { children: ReactNode }) {
+  // A caller that sets its own bg-* must win; two bg utilities on one element resolve by stylesheet order, not by props.
+  const bg = /\bbg-/.test(className) ? '' : 'bg-surface'
   return (
-    <div className={`rounded-3xl bg-surface p-5 shadow-sm ${className}`} {...rest}>
+    <div className={`rounded-3xl ${bg} p-5 shadow-sm ${className}`} {...rest}>
       {children}
     </div>
   )

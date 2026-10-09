@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { toDateString } from '../engine/scheduler'
 import { useContent } from '../store/content'
 import { BackupSchema, makeBackup, useProgress } from '../store/progress'
@@ -98,6 +99,8 @@ export function Settings() {
           <p className="text-sm text-ink-muted">Сборка от {manifest ? manifest.builtAt.slice(0, 10) : '—'}.</p>
           <Button variant="ghost" onClick={lock}>Забыть пароль на этом устройстве</Button>
         </Card>
+
+        <Link to="/help" className="block"><Button variant="secondary" className="w-full">Как заниматься</Button></Link>
       </div>
     </Screen>
   )

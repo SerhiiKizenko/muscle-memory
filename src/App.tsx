@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { HashRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { useContent } from './store/content'
 import { useProgress } from './store/progress'
+import { Help } from './ui/Help'
 import { Home } from './ui/Home'
 import { Lock } from './ui/Lock'
 import { Onboarding } from './ui/Onboarding'
@@ -39,6 +40,7 @@ function Gate() {
       <Route path="/topics" element={<Topics />} />
       <Route path="/weak" element={<Weak />} />
       <Route path="/settings" element={<Settings />} />
+      <Route path="/help" element={<Help />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
