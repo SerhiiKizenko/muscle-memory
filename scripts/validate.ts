@@ -27,9 +27,17 @@ export async function validateCards(raw: unknown[]): Promise<ValidationResult> {
   }
 
   const ids = new Set<string>()
+  const allIds = new Set(cards.map((c) => c.id))
   for (const c of cards) {
     if (ids.has(c.id)) errors.push(`${c.id}: duplicate id`)
     ids.add(c.id)
+    if (c.parentId && !allIds.has(c.parentId)) errors.push(`${c.id}: parent ${c.parentId} does not exist`)
+    if (c.type === 'mcq' && !c.quiz) errors.push(`${c.id}: mcq without quiz data`)
+    if (c.quiz) {
+      if (c.quiz.answer >= c.quiz.options.length) errors.push(`${c.id}: quiz answer index out of range`)
+      if (new Set(c.quiz.options.map((o) => o.trim().toLowerCase())).size !== c.quiz.options.length) errors.push(`${c.id}: duplicate quiz options`)
+      if (!c.parentId) errors.push(`${c.id}: quiz item without parentId`)
+    }
     if (c.sources.length === 0) errors.push(`${c.id}: no sources`)
     if (/\bTODO\b/.test(c.answer) || /\bTODO\b/.test(c.prompt)) errors.push(`${c.id}: contains TODO`)
     if (c.reviewStatus === 'checked') {
@@ -49,7 +57,7 @@ export async function validateCards(raw: unknown[]): Promise<ValidationResult> {
     if (missing.length) errors.push(`block ${block}: missing exam numbers ${missing.join(', ')}`)
     const extra = [...nums].filter((n) => n > EXPECTED_COUNTS[block])
     if (extra.length) errors.push(`block ${block}: unexpected exam numbers ${extra.join(', ')}`)
-    const top = mine.filter((c) => !c.subNumber)
+    const top = mine.filter((c) => !c.subNumber && !c.parentId)
     const dup = top.map((c) => c.examNumber).filter((n, i, a) => a.indexOf(n) !== i)
     if (dup.length) errors.push(`block ${block}: duplicated top-level numbers ${[...new Set(dup)].join(', ')}`)
     stats[block] = {

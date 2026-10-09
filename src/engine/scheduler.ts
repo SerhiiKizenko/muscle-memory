@@ -22,7 +22,15 @@ export interface SchedCard {
   block: 1 | 2 | 3 | 4
   cluster: string
   examNumber: number
+  /** quiz items drill a parent recall card and wait until the parent has been seen */
+  parentId?: string
 }
+
+/** A card may be introduced: recall cards always, quiz items only after their parent was seen. */
+export function canIntroduce(c: SchedCard, progress: ProgressMap): boolean {
+  return c.parentId === undefined || progress[c.parentId] !== undefined
+}
+const isRecall = (c: SchedCard): boolean => c.parentId === undefined
 
 /** Box cadence: 1 = every session, 2 = next day, 3 = +3 days, 4 = +7 days, 5 = final review only. */
 export const BOX_INTERVAL_DAYS: Record<Box, number | null> = { 1: 0, 2: 1, 3: 3, 4: 7, 5: null }
@@ -129,14 +137,14 @@ export function buildTodayQueue(i: TodayQueueInput): string[] {
       return p !== undefined && isDue(p, i.today)
     })
     .sort((a, b) => i.progress[a.id]!.box - i.progress[b.id]!.box || (i.progress[a.id]!.due ?? '').localeCompare(i.progress[b.id]!.due ?? '') || byExamOrder(a, b))
-  const fresh = i.cards.filter((c) => i.progress[c.id] === undefined).sort(byExamOrder)
+  const fresh = i.cards.filter((c) => i.progress[c.id] === undefined && canIntroduce(c, i.progress)).sort(byExamOrder)
   const quota = i.newLimit ?? newCardQuota(fresh.length, i.daysToExam)
   return [...interleaveByCluster(due), ...interleaveByCluster(fresh).slice(0, quota)].map((c) => c.id)
 }
 
 /** «Блок / тема»: everything matching `pick`; due and box-1 cards first, then unseen, then the rest, in exam order. */
 export function buildTopicQueue(cards: SchedCard[], progress: ProgressMap, today: string, pick: (c: SchedCard) => boolean): string[] {
-  const mine = cards.filter(pick).sort(byExamOrder)
+  const mine = cards.filter((c) => isRecall(c) && pick(c)).sort(byExamOrder)
   const rank = (c: SchedCard) => {
     const p = progress[c.id]
     if (!p) return 1
@@ -161,8 +169,17 @@ export function buildFinalReviewQueue(cards: SchedCard[], progress: ProgressMap)
 
 /** «Ещё N новых»: the next unseen cards beyond today's quota, cluster-interleaved. */
 export function buildExtraNewQueue(cards: SchedCard[], progress: ProgressMap, n: number): string[] {
-  const fresh = cards.filter((c) => progress[c.id] === undefined).sort(byExamOrder)
+  const fresh = cards.filter((c) => progress[c.id] === undefined && canIntroduce(c, progress)).sort(byExamOrder)
   return interleaveByCluster(fresh).slice(0, n).map((c) => c.id)
+}
+
+/** «Викторина»: quiz items whose parent was seen — due ones first (weakest box first), then unseen — capped. */
+export function buildQuizQueue(cards: SchedCard[], progress: ProgressMap, today: string, n: number): string[] {
+  const ready = cards.filter((c) => c.parentId !== undefined && canIntroduce(c, progress)).sort(byExamOrder)
+  const due = ready.filter((c) => progress[c.id] && isDue(progress[c.id]!, today)).sort((a, b) => progress[a.id]!.box - progress[b.id]!.box)
+  const fresh = ready.filter((c) => progress[c.id] === undefined)
+  const rest = ready.filter((c) => progress[c.id] && !isDue(progress[c.id]!, today))
+  return [...interleaveByCluster(due), ...interleaveByCluster(fresh), ...interleaveByCluster(rest)].slice(0, n).map((c) => c.id)
 }
 
 /** «Билет»: 3 × block 1 from different clusters + 1 each of blocks 2, 3, 4. */
@@ -171,14 +188,14 @@ export function buildTicket(cards: SchedCard[], rand: () => number): string[] {
   const out: SchedCard[] = []
   const usedClusters = new Set<string>()
   for (let k = 0; k < 3; k++) {
-    const pool = cards.filter((c) => c.block === 1 && !usedClusters.has(c.cluster))
-    const c = pickOne(pool.length ? pool : cards.filter((c) => c.block === 1))
+    const pool = cards.filter((c) => isRecall(c) && c.block === 1 && !usedClusters.has(c.cluster))
+    const c = pickOne(pool.length ? pool : cards.filter((c) => isRecall(c) && c.block === 1))
     if (!c) break
     usedClusters.add(c.cluster)
     out.push(c)
   }
   for (const block of [2, 3, 4] as const) {
-    const c = pickOne(cards.filter((c) => c.block === block))
+    const c = pickOne(cards.filter((c) => isRecall(c) && c.block === block))
     if (c) out.push(c)
   }
   return out.map((c) => c.id)

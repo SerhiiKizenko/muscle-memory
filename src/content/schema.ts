@@ -44,10 +44,21 @@ export const MuscleSchema = z
   })
   .strict()
 
+/** Multiple choice: `answer` indexes `options`; the UI shuffles the order per session. */
+export const QuizSchema = z
+  .object({
+    options: z.array(z.string().min(1)).min(2).max(6),
+    answer: z.number().int().nonnegative(),
+    explanation: z.string().optional(),
+  })
+  .strict()
+
 export const CardSchema = z
   .object({
-    /** b1-q001, b1-q142-03, b2-m01, b3-m07, b4-s12 */
-    id: z.string().regex(/^b[1-4]-[qms]\d{2,3}(-\d{2})?$/),
+    /** b1-q001, b1-q142-03 (sub-card), b1-q064-d01 (quiz item), b2-m01, b3-m07, b4-s12 */
+    id: z.string().regex(/^b[1-4]-[qms]\d{2,3}(-\d{2}|-d\d{2})?$/),
+    /** set on quiz items: the recall card they drill; they enter the plan only after the parent was seen */
+    parentId: z.string().optional(),
     block: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]),
     cluster: z.string().min(1),
     clusterTitle: z.string().min(1),
@@ -68,6 +79,7 @@ export const CardSchema = z
     flags: z.array(CardFlag).default([]),
     notes: z.string().optional(),
     muscle: MuscleSchema.optional(),
+    quiz: QuizSchema.optional(),
   })
   .strict()
 
@@ -82,6 +94,7 @@ export type Card = z.infer<typeof CardSchema>
 export type CardInput = z.input<typeof CardSchema>
 export type Source = z.infer<typeof SourceSchema>
 export type Muscle = z.infer<typeof MuscleSchema>
+export type Quiz = z.infer<typeof QuizSchema>
 export type Bundle = z.infer<typeof BundleSchema>
 export type Block = Card['block']
 

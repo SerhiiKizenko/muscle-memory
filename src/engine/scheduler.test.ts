@@ -4,6 +4,7 @@ import {
   applyGrade,
   buildExtraNewQueue,
   buildFinalReviewQueue,
+  buildQuizQueue,
   buildTicket,
   buildTodayQueue,
   buildTopicQueue,
@@ -150,5 +151,37 @@ describe('in-session requeue', () => {
     s = gradeInSession(s, 'good', () => 0)
     expect(isFinished(s)).toBe(true)
     expect(s.done).toBe(2)
+  })
+})
+
+describe('quiz items (mixture rule)', () => {
+  const cards: SchedCard[] = [
+    card('a1', 1, 'A', 1),
+    { ...card('a1-d01', 1, 'A', 1), parentId: 'a1' },
+    card('b1', 1, 'B', 14),
+    { ...card('b1-d01', 1, 'B', 14), parentId: 'b1' },
+  ]
+  it('a quiz item is not introduced before its parent was seen', () => {
+    expect(buildTodayQueue({ cards, progress: {}, today: T, daysToExam: 14, newLimit: 10 })).toEqual(['a1', 'b1'])
+    expect(buildQuizQueue(cards, {}, T, 20)).toEqual([])
+  })
+  it('after the parent is seen, the quiz item joins the new cards and the quiz mode', () => {
+    const progress: ProgressMap = { a1: { box: 2, due: '2026-10-10', introduced: T, lastReviewed: T, lastGrade: 'good', reps: 1, lapses: 0 } }
+    expect(buildTodayQueue({ cards, progress, today: T, daysToExam: 14, newLimit: 10 })).toEqual(['a1-d01', 'b1'])
+    expect(buildQuizQueue(cards, progress, T, 20)).toEqual(['a1-d01'])
+    expect(buildExtraNewQueue(cards, progress, 10)).toEqual(['a1-d01', 'b1'])
+  })
+  it('quiz mode puts due quiz items first and caps the count', () => {
+    const progress: ProgressMap = {
+      a1: { box: 3, due: '2026-10-12', introduced: T, lastReviewed: T, lastGrade: 'good', reps: 2, lapses: 0 },
+      b1: { box: 2, due: '2026-10-10', introduced: T, lastReviewed: T, lastGrade: 'good', reps: 1, lapses: 0 },
+      'a1-d01': { box: 1, due: T, introduced: T, lastReviewed: T, lastGrade: 'again', reps: 1, lapses: 1 },
+    }
+    expect(buildQuizQueue(cards, progress, T, 20)).toEqual(['a1-d01', 'b1-d01'])
+    expect(buildQuizQueue(cards, progress, T, 1)).toEqual(['a1-d01'])
+  })
+  it('topic and ticket queues keep recall cards only', () => {
+    expect(buildTopicQueue(cards, {}, T, (c) => c.block === 1)).toEqual(['a1', 'b1'])
+    expect(buildTicket(cards, () => 0).every((id) => !id.includes('-d'))).toBe(true)
   })
 })

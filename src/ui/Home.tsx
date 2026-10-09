@@ -1,7 +1,7 @@
-import { AlertTriangle, ChevronRight, Flame, Layers, RotateCcw, Settings as SettingsIcon, Shuffle, Sun } from 'lucide-react'
+import { AlertTriangle, ChevronRight, Flame, Layers, ListChecks, RotateCcw, Settings as SettingsIcon, Shuffle, Sun } from 'lucide-react'
 import { useMemo, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { buildTodayQueue, daysBetween, isDue, newCardQuota, toDateString } from '../engine/scheduler'
+import { buildQuizQueue, buildTodayQueue, daysBetween, isDue, newCardQuota, toDateString } from '../engine/scheduler'
 import { useContent } from '../store/content'
 import { useProgress } from '../store/progress'
 import { Card, plural, ProgressRing, Screen } from './components'
@@ -25,15 +25,17 @@ export function Home() {
   const today = toDateString(new Date())
   const daysToExam = settings.examDate ? daysBetween(today, settings.examDate) : null
 
-  const { due, fresh, seen, learned, todayCount } = useMemo(() => {
-    const sched = cards.map((c) => ({ id: c.id, block: c.block, cluster: c.cluster, examNumber: c.examNumber }))
+  const { due, fresh, seen, learned, todayCount, quizReady, quizTotal } = useMemo(() => {
+    const sched = cards.map((c) => ({ id: c.id, block: c.block, cluster: c.cluster, examNumber: c.examNumber, parentId: c.parentId }))
+    const quizTotal = sched.filter((c) => c.parentId).length
+    const quizReady = buildQuizQueue(sched, progress, today, 10_000).length
     const due = sched.filter((c) => progress[c.id] && isDue(progress[c.id]!, today)).length
     const unseen = sched.filter((c) => !progress[c.id]).length
     const fresh = Math.min(unseen, settings.newPerDay ?? newCardQuota(unseen, daysToExam ?? 14))
     const seen = sched.length - unseen
     const learned = sched.filter((c) => progress[c.id]?.box === 5).length
     const todayCount = buildTodayQueue({ cards: sched, progress, today, daysToExam: daysToExam ?? 14, newLimit: settings.newPerDay ?? undefined }).length
-    return { due, fresh, seen, learned, todayCount }
+    return { due, fresh, seen, learned, todayCount, quizReady, quizTotal }
   }, [cards, progress, today, daysToExam, settings.newPerDay])
 
   const checked = manifest ? Object.values(manifest.counts).reduce((n, c) => n + c.checked, 0) : 0
@@ -87,6 +89,18 @@ export function Home() {
           <ModeTile to="/weak" icon={<AlertTriangle />} title="Слабые места" hint="что чаще всего не знаю" />
           <ModeTile to="/study/final" icon={<RotateCcw />} title="Повтор перед экзаменом" hint="всё, что ещё не усвоено" />
         </div>
+        {quizTotal > 0 ? (
+          <Link to="/study/quiz" data-testid="home-quiz" className="flex items-center gap-3 rounded-2xl bg-surface-2 px-4 py-3 active:opacity-80">
+            <span className="text-sage-strong"><ListChecks /></span>
+            <span className="flex-1">
+              <span className="block font-semibold">Викторина</span>
+              <span className="block text-xs text-ink-muted">
+                {quizReady ? `${quizReady} ${plural(quizReady, 'вопрос', 'вопроса', 'вопросов')} с вариантами ответа` : 'вопросы откроются после карточек, которые вы уже прошли'}
+              </span>
+            </span>
+            <ChevronRight size={18} className="text-ink-muted" />
+          </Link>
+        ) : null}
 
         <p className="text-center text-xs text-ink-muted">
           Карточек: {cards.length}, сверено с материалами: {checked}. Остальные — черновик.

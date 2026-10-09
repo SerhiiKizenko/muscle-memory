@@ -28,10 +28,21 @@ test.describe('smoke (iPhone)', () => {
     await expect(t.get.answer()).toContainText('Тестовый ответ')
     await t.when.gradeGood()
     await expect(t.get.finished()).toBeVisible()
-    // «Ещё N новых» continues with unseen cards beyond the quota.
+    // «Ещё N новых» continues with unseen cards beyond the quota; the quiz item of the graded card is now eligible too.
     await page.getByTestId('study-more-new').click()
     await expect(t.get.prompt()).toContainText('Тестовый')
-    await expect(t.get.remaining()).toContainText('осталось 6')
+    await expect(t.get.remaining()).toContainText('осталось 7')
+
+    // «Викторина»: a wrong tap is highlighted, the right option is shown, «Дальше» moves on.
+    await page.goto('?data=data-test#/study/quiz')
+    await expect(t.get.prompt()).toContainText('Тестовый квиз')
+    const wrong = page.locator('[data-testid^=quiz-option-][data-correct=false]').first()
+    await wrong.click()
+    await expect(page.getByTestId('quiz-verdict')).toContainText('Неверно')
+    await expect(wrong).toHaveCSS('background-color', 'rgb(227, 156, 142)')
+    await expect(page.locator('[data-testid^=quiz-option-][data-correct=true]')).toHaveCSS('background-color', 'rgb(127, 181, 142)')
+    await page.getByTestId('quiz-next').click()
+    await expect(t.get.prompt()).toContainText('Тестовый квиз') // requeued after a wrong answer
 
     // «Блок / тема»: a failed card is requeued, so the session continues with another prompt.
     await t.when.openTopic(1)
