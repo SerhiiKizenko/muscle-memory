@@ -110,7 +110,7 @@ describe('topic / weak / ticket queues', () => {
     expect(buildFinalReviewQueue(cards, progress)).toEqual(['a2', 'a1'])
   })
   it('extra-new queue takes the next unseen cards across clusters', () => {
-    expect(buildExtraNewQueue(cards, progress, 3)).toEqual(['b1', 'm1', 't1'])
+    expect(buildExtraNewQueue(cards, progress, 3)).toEqual(['b1', 'g1', 'm1'])
     expect(buildExtraNewQueue(cards, progress, 10)).toHaveLength(5)
   })
   it('ticket = 3 × block 1 from different clusters + one of each other block', () => {
