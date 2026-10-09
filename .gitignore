@@ -17,3 +17,6 @@ test-results/
 # pwa dev artefacts
 dev-dist/
 *.tsbuildinfo
+
+# session kickoff prompt — local only
+KICKOFF-PROMPT.md
