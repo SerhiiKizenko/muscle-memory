@@ -96,6 +96,19 @@ export function Study() {
     setRevealed(false)
     window.scrollTo({ top: 0 })
   }
+  const quizTotal = useMemo(() => cards.filter((c) => c.parentId !== undefined).length, [cards])
+  function allQuiz() {
+    // Preview / late-stage mode: every quiz item regardless of whether its parent card was seen.
+    setSession(startSession(cards.filter((c) => c.parentId !== undefined).map((c) => c.id)))
+    setChosen(null)
+    window.scrollTo({ top: 0 })
+  }
+  const allQuizButton =
+    mode === 'quiz' && quizTotal > 0 ? (
+      <Button data-testid="quiz-all" variant="secondary" onClick={allQuiz}>
+        Все вопросы викторины ({quizTotal})
+      </Button>
+    ) : null
   const moreNewButton =
     mode === 'today' && unseenCount > 0 ? (
       <Button data-testid="study-more-new" variant="secondary" onClick={moreNew}>
@@ -132,6 +145,7 @@ export function Study() {
           <p className="text-lg font-semibold">Карточек нет</p>
           <p className="text-ink-muted">{mode === 'today' ? 'На сегодня всё сделано. Можно взять ещё новых, повторить тему или собрать билет.' : mode === 'quiz' ? 'Вопросы викторины появляются после того, как вы прошли их карточки в «Сегодня».' : 'В этом режиме пока нечего показывать.'}</p>
           {moreNewButton}
+          {allQuizButton}
           <Link to="/"><Button variant="secondary">На главную</Button></Link>
         </Card>
       </Screen>
