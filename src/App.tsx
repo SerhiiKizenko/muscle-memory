@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { HashRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { useContent } from './store/content'
 import { useProgress } from './store/progress'
 import { Home } from './ui/Home'
@@ -9,6 +9,12 @@ import { Settings } from './ui/Settings'
 import { Study } from './ui/Study'
 import { Topics } from './ui/Topics'
 import { Weak } from './ui/Weak'
+
+/** A new mode or topic must start a new session, so the study screen is remounted per URL. */
+function StudyRoute() {
+  const loc = useLocation()
+  return <Study key={loc.pathname + loc.search} />
+}
 
 function Gate() {
   const status = useContent((s) => s.status)
@@ -29,7 +35,7 @@ function Gate() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/study/:mode" element={<Study />} />
+      <Route path="/study/:mode" element={<StudyRoute />} />
       <Route path="/topics" element={<Topics />} />
       <Route path="/weak" element={<Weak />} />
       <Route path="/settings" element={<Settings />} />

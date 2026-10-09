@@ -1,5 +1,5 @@
 import { ChevronLeft } from 'lucide-react'
-import type { ButtonHTMLAttributes, ReactNode } from 'react'
+import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { BLOCK_TITLES, type Block } from '../content/schema'
 
@@ -72,8 +72,12 @@ export function ProgressRing({ value, size = 96, label, sub }: { value: number; 
   )
 }
 
-export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <div className={`rounded-3xl bg-surface p-5 shadow-sm ${className}`}>{children}</div>
+export function Card({ children, className = '', ...rest }: HTMLAttributes<HTMLDivElement> & { children: ReactNode }) {
+  return (
+    <div className={`rounded-3xl bg-surface p-5 shadow-sm ${className}`} {...rest}>
+      {children}
+    </div>
+  )
 }
 
 export const plural = (n: number, one: string, few: string, many: string): string => {

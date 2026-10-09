@@ -1,7 +1,8 @@
 // Encrypted-file format shared by scripts/encrypt.ts (Node) and the app (Safari).
-// Layout: magic "MMEM" (4) | version (1) | saltLen (1) | salt | ivLen (1) | iv | AES-GCM ciphertext+tag
-// Key: PBKDF2-SHA256(passphrase NFKC, salt, 210k) → AES-256-GCM. One salt per content build so the
-// app derives the key once and can cache the raw key; every file gets its own IV.
+// Layout: magic "MMEM" (4) | version (1) | iterations uint32 BE (4) | saltLen (1) | salt | ivLen (1) | iv | AES-GCM ciphertext+tag
+// Key: PBKDF2-SHA256(passphrase NFKC, salt, iterations) → AES-256-GCM. One salt per content build so the
+// app derives the key once and can cache the raw key; every file gets its own IV. The header is
+// self-describing, so the app never needs a side file to open a bundle.
 
 export const FORMAT_VERSION = 1
 export const PBKDF2_ITERATIONS = 210_000
@@ -11,6 +12,7 @@ const MAGIC = Uint8Array.from([0x4d, 0x4d, 0x45, 0x4d]) // "MMEM"
 
 export interface EncHeader {
   version: number
+  iterations: number
   salt: Uint8Array
   iv: Uint8Array
 }
@@ -40,10 +42,12 @@ export function randomBytes(n: number): Uint8Array {
 }
 
 export function encodeFile(header: EncHeader, ciphertext: Uint8Array): Uint8Array {
-  const out = new Uint8Array(4 + 1 + 1 + header.salt.length + 1 + header.iv.length + ciphertext.length)
+  const out = new Uint8Array(4 + 1 + 4 + 1 + header.salt.length + 1 + header.iv.length + ciphertext.length)
+  const view = new DataView(out.buffer)
   let o = 0
   out.set(MAGIC, o); o += 4
   out[o++] = header.version
+  view.setUint32(o, header.iterations); o += 4
   out[o++] = header.salt.length
   out.set(header.salt, o); o += header.salt.length
   out[o++] = header.iv.length
@@ -53,20 +57,26 @@ export function encodeFile(header: EncHeader, ciphertext: Uint8Array): Uint8Arra
 }
 
 export function decodeFile(bytes: Uint8Array): { header: EncHeader; ciphertext: Uint8Array } {
-  if (bytes.length < 7 || !MAGIC.every((b, i) => bytes[i] === b)) throw new Error('not an MMEM file')
+  if (bytes.length < 11 || !MAGIC.every((b, i) => bytes[i] === b)) throw new Error('not an MMEM file')
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength)
   let o = 4
   const version = bytes[o++]!
   if (version !== FORMAT_VERSION) throw new Error(`unsupported format version ${version}`)
+  const iterations = view.getUint32(o); o += 4
   const saltLen = bytes[o++]!
   const salt = bytes.slice(o, o + saltLen); o += saltLen
   const ivLen = bytes[o++]!
   const iv = bytes.slice(o, o + ivLen); o += ivLen
-  if (saltLen === 0 || ivLen === 0 || o > bytes.length) throw new Error('corrupted MMEM header')
-  return { header: { version, salt, iv }, ciphertext: bytes.slice(o) }
+  if (saltLen === 0 || ivLen === 0 || iterations === 0 || o > bytes.length) throw new Error('corrupted MMEM header')
+  return { header: { version, iterations, salt, iv }, ciphertext: bytes.slice(o) }
 }
 
 export function readSalt(bytes: Uint8Array): Uint8Array {
   return decodeFile(bytes).header.salt
+}
+
+export function readHeader(bytes: Uint8Array): EncHeader {
+  return decodeFile(bytes).header
 }
 
 export async function deriveKey(
@@ -94,10 +104,11 @@ export async function encryptFile(
   key: CryptoKey,
   plaintext: Uint8Array,
   salt: Uint8Array,
+  iterations: number,
   iv: Uint8Array = randomBytes(IV_BYTES),
 ): Promise<Uint8Array> {
   const ct = new Uint8Array(await subtle().encrypt({ name: 'AES-GCM', iv: buf(iv) }, key, buf(plaintext)))
-  return encodeFile({ version: FORMAT_VERSION, salt, iv }, ct)
+  return encodeFile({ version: FORMAT_VERSION, iterations, salt, iv }, ct)
 }
 
 export async function decryptFile(key: CryptoKey, bytes: Uint8Array): Promise<Uint8Array> {

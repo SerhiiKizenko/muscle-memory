@@ -20,7 +20,8 @@
     "encrypt": "tsx scripts/encrypt.ts",
     "import-answers": "tsx scripts/import-answers.ts",
     "find": "tsx scripts/find.ts",
-    "apply-verified": "tsx scripts/apply-verified.ts"
+    "apply-verified": "tsx scripts/apply-verified.ts",
+    "test-bundle": "tsx scripts/make-test-bundle.ts"
   },
   "dependencies": {
     "@fontsource-variable/nunito": "^5.3.0",

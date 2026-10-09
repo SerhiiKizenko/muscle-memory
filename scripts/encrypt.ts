@@ -41,14 +41,14 @@ async function main() {
   await mkdir(join(PUBLIC_DATA_DIR, 'img'), { recursive: true })
   const bundle: Bundle = { version: 1, cards: result.cards }
   const plain = new TextEncoder().encode(JSON.stringify(bundle))
-  const enc = await encryptFile(key, plain, salt, await syntheticIv(salt, plain))
+  const enc = await encryptFile(key, plain, salt, iterations, await syntheticIv(salt, plain))
   await writeFile(join(PUBLIC_DATA_DIR, 'bundle.enc'), enc)
   console.log(`bundle.enc: ${fmtBytes(enc.length)} (${result.cards.length} cards, ${fmtBytes(plain.length)} plain)`)
 
   const images: { id: string; file: string; bytes: number }[] = []
   for (const f of (await readdir(IMAGES_DIR).catch(() => [] as string[])).sort()) {
     const data = new Uint8Array(await readFile(join(IMAGES_DIR, f)))
-    const out = await encryptFile(key, data, salt, await syntheticIv(salt, data))
+    const out = await encryptFile(key, data, salt, iterations, await syntheticIv(salt, data))
     await writeFile(join(PUBLIC_DATA_DIR, 'img', `${f}.enc`), out)
     images.push({ id: f, file: `img/${f}.enc`, bytes: out.length })
   }

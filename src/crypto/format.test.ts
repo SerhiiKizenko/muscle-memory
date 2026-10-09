@@ -8,6 +8,7 @@ import {
   fromHex,
   importRawKey,
   randomBytes,
+  readHeader,
   readSalt,
   syntheticIv,
   toHex,
@@ -22,16 +23,17 @@ describe('encrypted file format', () => {
   it('round-trips Cyrillic text through encrypt → decrypt', async () => {
     const salt = randomBytes(16)
     const key = await deriveKey('пароль-тест', salt, ITER)
-    const file = await encryptFile(key, enc('Дельтовидная мышца — m. deltoideus'), salt)
+    const file = await encryptFile(key, enc('Дельтовидная мышца — m. deltoideus'), salt, ITER)
     expect(dec(await decryptFile(key, file))).toBe('Дельтовидная мышца — m. deltoideus')
     expect(toHex(readSalt(file))).toBe(toHex(salt))
+    expect(readHeader(file).iterations).toBe(ITER)
   })
 
   it('rejects a wrong passphrase with WrongKeyError', async () => {
     const salt = randomBytes(16)
     const good = await deriveKey('правильный', salt, ITER)
     const bad = await deriveKey('неправильный', salt, ITER)
-    const file = await encryptFile(good, enc('secret'), salt)
+    const file = await encryptFile(good, enc('secret'), salt, ITER)
     await expect(decryptFile(bad, file)).rejects.toBeInstanceOf(WrongKeyError)
   })
 
@@ -39,14 +41,14 @@ describe('encrypted file format', () => {
     const salt = randomBytes(16)
     const composed = await deriveKey('й', salt, ITER) // U+0439
     const decomposed = await deriveKey('й', salt, ITER) // и + combining breve
-    const file = await encryptFile(composed, enc('x'), salt)
+    const file = await encryptFile(composed, enc('x'), salt, ITER)
     expect(dec(await decryptFile(decomposed, file))).toBe('x')
   })
 
   it('exported raw key re-imports and still decrypts (device cache path)', async () => {
     const salt = randomBytes(16)
     const key = await deriveKey('p', salt, ITER)
-    const file = await encryptFile(key, enc('cached'), salt)
+    const file = await encryptFile(key, enc('cached'), salt, ITER)
     const raw = await exportRawKey(key)
     expect(raw.length).toBe(32)
     const again = await importRawKey(fromHex(toHex(raw)))
@@ -64,8 +66,8 @@ describe('encrypted file format', () => {
     const iv2 = await syntheticIv(salt, enc('same'))
     expect(toHex(iv1)).toBe(toHex(iv2))
     expect(toHex(await syntheticIv(salt, enc('other')))).not.toBe(toHex(iv1))
-    const a = await encryptFile(key, enc('same'), salt, iv1)
-    const b = await encryptFile(key, enc('same'), salt, iv2)
+    const a = await encryptFile(key, enc('same'), salt, ITER, iv1)
+    const b = await encryptFile(key, enc('same'), salt, ITER, iv2)
     expect(toHex(a)).toBe(toHex(b))
   })
 })
