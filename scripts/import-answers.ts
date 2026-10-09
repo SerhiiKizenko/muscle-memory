@@ -380,7 +380,7 @@ async function main() {
 
   await mkdir(DOCS_DIR, { recursive: true })
   const q = queue.map((s) => `- \`${s.id}\` — ${s.reason}`).join('\n')
-  await writeFile(join(DOCS_DIR, 'REVIEW-QUEUE.md'), `# Review queue\n\nCards that need a human (Kate / Serhii) before they can be trusted. Ids only — the repo is public, so no course text here. Details live in the local, gitignored \`content/import-report.md\`.\n\n## Stubs — no answer in the draft (${queue.length})\n\n${q || '—'}\n\n## Unsupported claims\n\n_(filled during verification)_\n`)
+  await writeFile(join(DOCS_DIR, 'REVIEW-QUEUE.md'), `# Review queue\n\nCards that need a human (the learner / Serhii) before they can be trusted. Ids only — the repo is public, so no course text here. Details live in the local, gitignored \`content/import-report.md\`.\n\n## Stubs — no answer in the draft (${queue.length})\n\n${q || '—'}\n\n## Unsupported claims\n\n_(filled during verification)_\n`)
 
   console.log(`imported: block1 ${b1.length}, block2 ${b2.length}, block3 ${b3.length}, block4 ${b4.length}; stubs ${queue.length}; cleanup edits ${edits.length}`)
   console.log(`report: content/import-report.md; queue: docs/REVIEW-QUEUE.md`)
