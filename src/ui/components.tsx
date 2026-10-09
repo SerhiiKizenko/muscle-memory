@@ -5,7 +5,7 @@ import { BLOCK_TITLES, type Block } from '../content/schema'
 
 export function Screen({ title, back, right, children, footer }: { title?: string; back?: string; right?: ReactNode; children: ReactNode; footer?: ReactNode }) {
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col">
       {(title || back) && (
         <header className="safe-top safe-x sticky top-0 z-10 flex items-center gap-2 bg-bg/90 pb-2 backdrop-blur">
           {back ? (

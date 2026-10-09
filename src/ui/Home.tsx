@@ -1,10 +1,20 @@
-import { AlertTriangle, Flame, Layers, RotateCcw, Settings as SettingsIcon, Shuffle, Sun } from 'lucide-react'
-import { useMemo } from 'react'
+import { AlertTriangle, ChevronRight, Flame, Layers, RotateCcw, Settings as SettingsIcon, Shuffle, Sun } from 'lucide-react'
+import { useMemo, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { buildTodayQueue, daysBetween, isDue, newCardQuota, toDateString } from '../engine/scheduler'
 import { useContent } from '../store/content'
 import { useProgress } from '../store/progress'
-import { Button, Card, plural, ProgressRing, Screen } from './components'
+import { Card, plural, ProgressRing, Screen } from './components'
+
+function ModeTile({ to, icon, title, hint }: { to: string; icon: ReactNode; title: string; hint: string }) {
+  return (
+    <Link to={to} className="flex min-h-24 flex-col items-center justify-center gap-1 rounded-2xl bg-surface-2 px-3 py-3 text-center active:opacity-80">
+      <span className="text-sage-strong">{icon}</span>
+      <span className="font-semibold">{title}</span>
+      <span className="text-xs text-ink-muted">{hint}</span>
+    </Link>
+  )
+}
 
 export function Home() {
   const cards = useContent((s) => s.cards)
@@ -55,27 +65,24 @@ export function Home() {
           <Card className="flex items-center gap-4 bg-sage-strong text-white">
             <Sun size={28} />
             <div className="flex-1">
-              <div className="text-lg font-bold">Сегодня</div>
+              <div className="text-lg font-bold">Сегодня — план на день</div>
               <div className="text-sm opacity-90">
                 {todayCount === 0 ? 'На сегодня всё сделано' : `${due} на повтор · ${fresh} ${plural(fresh, 'новая', 'новые', 'новых')}`}
               </div>
             </div>
+            <span className="flex items-center gap-1 text-base font-semibold">Начать <ChevronRight size={20} /></span>
           </Card>
         </Link>
+        {seen === 0 ? (
+          <p className="px-1 text-sm text-ink-muted">Как это работает: читаете вопрос → отвечаете вслух → «Показать ответ» → честно оцениваете себя. Карточки, которые не знаете, вернутся позже в этой же сессии и в следующие дни.</p>
+        ) : null}
 
+        <p className="px-1 pt-1 text-xs font-semibold uppercase tracking-wide text-ink-muted">Дополнительно</p>
         <div className="grid grid-cols-2 gap-3">
-          <Link to="/topics">
-            <Button variant="secondary" className="w-full flex-col py-3"><Layers /> Блок / тема</Button>
-          </Link>
-          <Link to="/study/ticket">
-            <Button variant="secondary" className="w-full flex-col py-3"><Shuffle /> Билет</Button>
-          </Link>
-          <Link to="/weak">
-            <Button variant="secondary" className="w-full flex-col py-3"><AlertTriangle /> Слабые места</Button>
-          </Link>
-          <Link to="/study/final">
-            <Button variant="secondary" className="w-full flex-col py-3"><RotateCcw /> Повтор перед экзаменом</Button>
-          </Link>
+          <ModeTile to="/topics" icon={<Layers />} title="Блок / тема" hint="выбрать тему и пройти её целиком" />
+          <ModeTile to="/study/ticket" icon={<Shuffle />} title="Билет" hint="6 вопросов, как на экзамене" />
+          <ModeTile to="/weak" icon={<AlertTriangle />} title="Слабые места" hint="что чаще всего не знаю" />
+          <ModeTile to="/study/final" icon={<RotateCcw />} title="Повтор перед экзаменом" hint="всё, что ещё не усвоено" />
         </div>
 
         <p className="text-center text-xs text-ink-muted">

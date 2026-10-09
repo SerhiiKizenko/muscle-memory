@@ -10,7 +10,7 @@ export function Onboarding() {
   const [date, setDate] = useState(existing ?? addDays(toDateString(new Date()), 14))
 
   return (
-    <main className="safe-top safe-bottom safe-x flex min-h-dvh flex-col justify-center gap-5">
+    <main className="safe-top safe-bottom safe-x mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center gap-5">
       <h1 className="text-2xl font-bold">Перед началом</h1>
       <Card className="flex flex-col gap-3">
         <div className="flex items-center gap-2 font-semibold">
